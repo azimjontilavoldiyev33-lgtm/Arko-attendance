@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // O'z serveringiz URL ini qo'ying
-const BASE_URL = "https://your-api.com/api";
+const BASE_URL = "arko-attendance-production.up.railway.app";
 
 const api = axios.create({
   baseURL: BASE_URL,

@@ -19,7 +19,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    const cleaned = phone.replace(/\s/g, "");
+    const cleaned = "+998" + phone.replace(/\s/g, "");
     if (cleaned.length < 9) {
       Alert.alert("Xatolik", "Telefon raqamini to'g'ri kiriting");
       return;

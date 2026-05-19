@@ -14,13 +14,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     infoPlist: {
-      NSFaceIDUsageDescription:
-        "Davomat tizimi uchun Face ID talab qilinadi",
+      NSFaceIDUsageDescription: "Davomat tizimi uchun Face ID talab qilinadi",
       NSLocationWhenInUseUsageDescription:
         "Ishxona hududida ekanligingizni tekshirish uchun GPS talab qilinadi",
     },
   },
   android: {
+    package: "com.azimjon.attendanceapp",
     permissions: [
       "USE_BIOMETRIC",
       "USE_FINGERPRINT",
@@ -39,4 +39,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
   ],
+  extra: {
+    eas: {
+      projectId: "f9f1362c-cfde-495e-ae22-a47069e74f22",
+    },
+  },
 });

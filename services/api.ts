@@ -1,11 +1,11 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// CRM (Next.js) backend. ngrok URL har qayta ishga tushganda o'zgaradi —
-// EXPO_PUBLIC_API_URL orqali o'rnatish mumkin (kodga tegmasdan).
+// CRM (Next.js) backend — Vercel'da doimiy joylashgan (kompyuter/ngrok kerak emas).
+// Kerak bo'lsa EXPO_PUBLIC_API_URL orqali boshqa manzilga o'tkazish mumkin.
 const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ??
-  "https://grieving-plow-credit.ngrok-free.dev/api";
+  "https://arko-crm.vercel.app/api";
 
 const api = axios.create({
   baseURL: BASE_URL,

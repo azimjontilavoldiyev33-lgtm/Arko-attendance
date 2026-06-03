@@ -12,7 +12,7 @@
       "distribution": "internal",
       "env": {
         "NPM_FLAGS": "--legacy-peer-deps",
-        "EXPO_PUBLIC_API_URL": "https://grieving-plow-credit.ngrok-free.dev/api"
+        "EXPO_PUBLIC_API_URL": "https://arko-crm.vercel.app/api"
       }
     },
     "production": {

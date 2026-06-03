@@ -18,26 +18,25 @@ export default function LoginScreen() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    const cleaned = "+998" + phone.replace(/\s/g, "");
-    if (cleaned.length < 9) {
-      Alert.alert("Xatolik", "Telefon raqamini to'g'ri kiriting");
-      return;
-    }
+const handleLogin = async () => {
+  const digits = phone.replace(/\D/g, "");
 
-    setLoading(true);
-    try {
-      await loginWorker(cleaned);
-      router.replace("/home");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        "Ishchi topilmadi. Raqamni tekshiring.";
-      Alert.alert("Kirish xatosi", msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (digits.length !== 9) {
+    Alert.alert("Xatolik", `9 ta raqam kiriting (hozir ${digits.length} ta)`);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await loginWorker(digits);
+    router.replace("/home");
+  } catch (err: any) {
+    const msg = err?.response?.data?.message || "Ishchi topilmadi.";
+    Alert.alert("Kirish xatosi", msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -71,7 +70,7 @@ export default function LoginScreen() {
             placeholder="90 123 45 67"
             placeholderTextColor={Colors.textMuted}
             keyboardType="phone-pad"
-            maxLength={13}
+              maxLength={13} 
             autoFocus
           />
         </View>

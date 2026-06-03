@@ -11,7 +11,8 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "NPM_FLAGS": "--legacy-peer-deps"
+        "NPM_FLAGS": "--legacy-peer-deps",
+        "EXPO_PUBLIC_API_URL": "https://grieving-plow-credit.ngrok-free.dev/api"
       }
     },
     "production": {

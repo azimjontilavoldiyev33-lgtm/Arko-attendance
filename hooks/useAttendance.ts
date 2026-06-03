@@ -39,55 +39,67 @@ export function useAttendance(): UseAttendanceReturn {
   }, []);
 
   // ─── Step 1: Face ID ──────────────────────────────────────────────────────
-  const verifyFace = async (): Promise<boolean> => {
-    const compatible = await LocalAuthentication.hasHardwareAsync();
-    if (!compatible) {
-      // Dev/test muhiti uchun — real qurilmada olib tashlang
+const verifyFace = async (): Promise<boolean> => {
+  const compatible = await LocalAuthentication.hasHardwareAsync();
+  const enrolled = await LocalAuthentication.isEnrolledAsync();
+
+  // Qurilmada biometrika/ekran qulfi sozlanmagan bo'lsa:
+  if (!compatible || !enrolled) {
+    // Faqat dev/emulatorda test uchun o'tkazib yuboramiz.
+    if (__DEV__) {
       return true;
     }
+    // Productionda JIM o'tkazib yubormaymiz — bu xavfsizlik teshigi bo'lar edi.
+    throw new Error(
+      "Qurilmada Face ID / barmoq izi yoki ekran qulfi sozlanmagan. Telefon sozlamalaridan yoqing."
+    );
+  }
 
-    const enrolled = await LocalAuthentication.isEnrolledAsync();
-    if (!enrolled) {
-      setMessage("Face ID yoki Touch ID ro'yxatdan o'tilmagan");
-      return false;
-    }
+  const result = await LocalAuthentication.authenticateAsync({
+    promptMessage: "Davomatni tasdiqlash uchun Face ID / barmoq izidan foydalaning",
+    fallbackLabel: "PIN kodni kiriting",
+    cancelLabel: "Bekor qilish",
+    disableDeviceFallback: false,
+  });
 
-    const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: "Davomatni tasdiqlash uchun Face ID dan foydalaning",
-      fallbackLabel: "PIN kodni kiriting",
-      cancelLabel: "Bekor qilish",
-      disableDeviceFallback: false,
-    });
-
-    return result.success;
-  };
+  return result.success;
+};
 
   // ─── Step 2: GPS ──────────────────────────────────────────────────────────
-  const verifyLocation = async (): Promise<{
-    lat: number;
-    lng: number;
-    inRange: boolean;
-  }> => {
-    const { status: permStatus } =
-      await Location.requestForegroundPermissionsAsync();
+const verifyLocation = async (): Promise<{
+  lat: number;
+  lng: number;
+  inRange: boolean;
+  distance: number;
+}> => {
+  const { status: permStatus } =
+    await Location.requestForegroundPermissionsAsync();
 
-    if (permStatus !== "granted") {
-      throw new Error("GPS ruxsati berilmadi");
-    }
+  if (permStatus !== "granted") {
+    throw new Error("GPS ruxsati berilmadi");
+  }
 
-    const loc = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.High,
-    });
+  const loc = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.High,
+  });
 
-    const { latitude: lat, longitude: lng } = loc.coords;
+  const { latitude: lat, longitude: lng } = loc.coords;
 
-    // Ishxona joylashuvini olish
+  // Ofis joylashuvini olib, masofani hisoblaymiz (darhol UX feedback uchun).
+  // Yakuniy qarorni baribir backend qiladi — bu faqat foydalanuvchiga
+  // tezroq xabar berish uchun.
+  let inRange = true;
+  let distance = 0;
+  try {
     const office = await getOfficeLocation();
-    const distanceKm = getDistance(lat, lng, office.lat, office.lng);
-    const radiusKm = office.radius / 1000; // metr → km
+    distance = Math.round(getDistance(lat, lng, office.lat, office.lng) * 1000); // metr
+    inRange = distance <= office.radius;
+  } catch {
+    // Ofis sozlamasini olib bo'lmadi — qarorni backendga qoldiramiz
+  }
 
-    return { lat, lng, inRange: distanceKm <= radiusKm };
-  };
+  return { lat, lng, inRange, distance };
+};
 
   // ─── Shared logic ─────────────────────────────────────────────────────────
   const perform = async (
@@ -106,11 +118,13 @@ export function useAttendance(): UseAttendanceReturn {
       }
 
       setMessage("GPS joylashuv aniqlanmoqda...");
-      const { lat, lng, inRange } = await verifyLocation();
+      const { lat, lng, inRange, distance } = await verifyLocation();
 
       if (!inRange) {
         setStatus("error");
-        setMessage("Siz ishxona hududida emassiz. Yaqinroq keling.");
+        setMessage(
+          `Siz ish joyidan ${distance} m uzoqdasiz. Yaqinroq keling.`
+        );
         return;
       }
 

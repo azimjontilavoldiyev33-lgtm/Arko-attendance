@@ -12,6 +12,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     backgroundColor: "#0A0A0F",
   },
   ios: {
+    bundleIdentifier: "com.azimjon.attendanceapp",
     supportsTablet: false,
     infoPlist: {
       NSFaceIDUsageDescription: "Davomat tizimi uchun Face ID talab qilinadi",
